@@ -1,0 +1,11 @@
+<adventure>
+	<node name="start">
+		<text>Text for this node</text>
+		<choice node="node2">This leads to node2</choice>
+		<choice node="node3">This leads to node3</choice>
+	</node>
+	
+	<node1 name="end">
+		<text>This is the end.</text>
+	</node1>
+</adventure>

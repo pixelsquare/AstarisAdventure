@@ -7,9 +7,9 @@
 		<text>Dusting off, I looked upon the loooooong desert. It was only dunes upon dunes. It was neverending dunes.</text>
 		<text>"Hah, no one really is around."</text>
 		<text>But, as I looked behind me, I managed to see something from a distance. It's a/an...</text>
-		<choices node="node1">Oasis</choices>
-		<choices node="node2">Person riding a camel</choices>
-		<choices node="node3">Long Caravan</choices>
+		<choices name="node1">Oasis</choices>
+		<choices name="node2">Person riding a camel</choices>
+		<choices name="node3">Long Caravan</choices>
 	</node>
 	
 	<node name="node1">
