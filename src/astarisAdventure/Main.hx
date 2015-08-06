@@ -1,29 +1,22 @@
 package astarisAdventure;
 
-import flambe.asset.File;
+import astarisAdventure.utils.AssetName;
+import flambe.asset.AssetPack;
+import flambe.asset.Manifest;
+import flambe.display.FillSprite;
 import flambe.display.Font;
 import flambe.display.TextSprite;
 import flambe.Entity;
 import flambe.input.PointerEvent;
 import flambe.System;
-import flambe.asset.AssetPack;
-import flambe.asset.Manifest;
-import flambe.display.FillSprite;
-import flambe.display.ImageSprite;
 import flambe.util.SignalConnection;
-import haxe.xml.Fast;
+import flash.utils.Function;
 
-import astarisAdventure.utils.AssetName;
-import astarisAdventure.pxlSq.Utils;
 
 class Main
 {
 	private static var assetPack: AssetPack;
 	private static var titleFont: Font;
-	private static var bettyFont_20: Font;
-	private static var bettyFont_32: Font;
-	private static var garamondFont: Font;
-	private static var garamondItalicFont: Font;
 		
 	private static var titleScreenEntity: Entity;
 	private static var mainGameScreenEntity: Entity;
@@ -64,16 +57,11 @@ class Main
 		
 		assetPack = pack;
 		titleFont = new Font(assetPack, AssetName.FONT_HAZEL_GRACE_80);
-		bettyFont_20 = new Font(assetPack, AssetName.FONT_BETTY_20);
-		bettyFont_32 = new Font(assetPack, AssetName.FONT_BETTY_32);
-		garamondFont = new Font(assetPack, AssetName.FONT_APPLE_GARAMOND_32 );
-		garamondItalicFont = new Font(assetPack, AssetName.FONT_APPLE_GARMOND_ITALIC_32 );
 		
 		createTitleScreen();
 		createMainGameScreen();
 		
 		showTitleScreen();
-		//showMainGameScreen();
     }
 	
 	private static function createTitleScreen() {
@@ -92,13 +80,13 @@ class Main
 		//atarisText.y._ = titleBG.height._ / 2 + (atarisText.getNaturalHeight() / 2);
 		titleEntity.addChild(new Entity().add(astarisText));		
 		
-		var adventureText: TextSprite = new TextSprite(bettyFont_20, "Choose your own Adventure");
+		var adventureText: TextSprite = new TextSprite(new Font(assetPack, AssetName.FONT_BETTY_20), "Choose your own Adventure");
 		adventureText.centerAnchor();
 		adventureText.x._ = System.stage.width / 2;
 		adventureText.y._ = titleBG.height._ * 0.8;
 		titleEntity.addChild(new Entity().add(adventureText));
 		
-		var clickAnywhereText: TextSprite = new TextSprite(bettyFont_32, "Click anywhere to Start!");
+		var clickAnywhereText: TextSprite = new TextSprite(new Font(assetPack, AssetName.FONT_BETTY_32), "Click anywhere to Start!");
 		clickAnywhereText.centerAnchor();
 		clickAnywhereText.x._ = System.stage.width / 2;
 		clickAnywhereText.y._ = System.stage.height * 0.7;
@@ -110,28 +98,30 @@ class Main
 	private static function createMainGameScreen() {
 		mainGameScreenEntity = new Entity();
 		
+		var astarisFooterEntity: Entity = new Entity();
+		var astarisFooterBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width, 30);
+		astarisFooterBG.y._ = System.stage.height * 0.95 - (astarisFooterBG.height._ / 2);
+		astarisFooterEntity.add(astarisFooterBG);
+		
+		var astarisText: TextSprite = new TextSprite(new Font(assetPack, AssetName.FONT_BETTY_20), "Astaris");
+		astarisText.x._ = System.stage.width / 2;
+		astarisText.y._ = astarisFooterBG.height._ / 2 - (astarisText.getNaturalHeight() / 2);
+		astarisFooterEntity.addChild(new Entity().add(astarisText));
+		
+		mainGameScreenEntity.addChild(astarisFooterEntity);
+		
 		adventureEngine = new AdventureEngine();
-		adventureEngine.Init(garamondFont, garamondItalicFont, assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE));
-		adventureEngine.OnRestart(function() { 
+		adventureEngine.Init(
+			new Font(assetPack, AssetName.FONT_APPLE_GARAMOND_32), 
+			new Font(assetPack, AssetName.FONT_APPLE_GARMOND_ITALIC_32), 
+			assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE)
+		);
+		
+		adventureEngine.goToMenuBG.pointerUp.connect(function(event: PointerEvent) {
 			showTitleScreen();
 		});
 		
 		mainGameScreenEntity.add(adventureEngine);
-		
-		//var headerEntity: Entity = new Entity();
-		//headerBG = new FillSprite(0xFFFFFF, System.stage.width * 0.8, 200);
-		//headerBG.x._ = System.stage.width / 2 - (headerBG.width._ / 2);
-		//headerBG.y._ = System.stage.height * 0.3 - (headerBG.height._ / 2);
-		////headerBG.setAlpha(0);
-		//headerEntity.add(headerBG);
-		//
-		//headerText = new TextSprite(titleFont, "\"You see, sir. Your caravan will give me opportunities to seek out the truth of who I am and where I came from. I woke up in the middle of the desert with no memories and your caravan is the first help I could find. I just want to survive and find out who I am.\"");
-		//headerText.setXY(10, 10);
-		//headerText.setWrapWidth(500);
-		////headerText.setAlpha(0);
-		//headerEntity.addChild(new Entity().add(headerText));
-		//
-		//mainGameScreenEntity.addChild(headerEntity);
 	}
 	
 	private static function showTitleScreen() {			
@@ -140,25 +130,16 @@ class Main
 		
 		titleScreenSignalConnection = System.pointer.down.connect(
 		function(event: PointerEvent) {
-			System.root.removeChild(titleScreenEntity);
-			System.root.addChild(mainGameScreenEntity);
-			
-			adventureEngine.Reset();
+			showMainGameScreen();
+			//adventureEngine.Reset();
 		}).once();
 	}
 	
-	//private static function showMainGameScreen() {
-		//var script: Script = new Script();
-		//script.run(new Sequence([
-				//new AnimateTo(headerBG.alpha, 1, 1),
-				//new AnimateTo(headerText.alpha, 1, 1)
-			//])
-		//);
-		//
-		//mainGameScreenEntity.add(script);
-		//mainGameScreenEntity.addChild(new Entity().add(script));
+	private static function showMainGameScreen() {
+		adventureEngine.ResetStage();
+		adventureEngine.SetupStage();
 		
-		//System.root.removeChild(titleScreenEntity);
-		//System.root.addChild(mainGameScreenEntity);
-	//}
+		System.root.removeChild(titleScreenEntity);
+		System.root.addChild(mainGameScreenEntity);
+	}
 }

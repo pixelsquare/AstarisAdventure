@@ -11,6 +11,7 @@ import flambe.Entity;
 import flambe.asset.File;
 import flambe.math.FMath;
 import haxe.xml.Fast;
+import hxsl.PicoShaderInstance;
 
 import flambe.script.Script;
 import flambe.script.Sequence;
@@ -32,9 +33,13 @@ class AdventureEngine extends Component
 	private var adventureEntity: Entity;
 	private var textOptionsEntity: Entity;
 	private var choicesEntity: Entity;
+	private var xmlInfoEntity: Entity;
 	
 	private var nextTextEntity: Entity;
 	private var backTextEntity: Entity;
+	
+	private var nextTextBG: FillSprite;
+	private var backTextBG: FillSprite;
 	
 	private var goToMenuEntity: Entity;
 	
@@ -42,7 +47,7 @@ class AdventureEngine extends Component
 	private var xmlFast: Fast;
 	
 	private var headerText: TextSprite;
-	private var goToMenuBG: FillSprite;
+	public var goToMenuBG(default, null): FillSprite;
 	
 	private var gameFont: Font;
 	private var gameFontItalic: Font;
@@ -53,7 +58,7 @@ class AdventureEngine extends Component
 	private var nodeTexts = [];
 	private var nodeChoices = [];
 	
-	private var onRestartFunc: Dynamic;
+	//private var onRestartFunc: Dynamic;
 	
 	private var curTextIndx: Int;
 	
@@ -62,6 +67,7 @@ class AdventureEngine extends Component
 		adventureEntity = new Entity();
 		textOptionsEntity = new Entity();
 		choicesEntity = new Entity();
+		xmlInfoEntity = new Entity();
 	}
 	
 	override public function onAdded() 
@@ -79,7 +85,6 @@ class AdventureEngine extends Component
 		
 		mainNode = xmlFast;
 		curNode = Utils.GetNodeFrom(mainNode, "start");
-		SetupStage();
 		
 		var headerEntity: Entity = new Entity();
 		var headerBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.8, 200);
@@ -87,7 +92,7 @@ class AdventureEngine extends Component
 		headerBG.y._ = System.stage.height * 0.3 - (headerBG.height._ / 2);
 		headerEntity.add(headerBG);
 		
-		headerText = new TextSprite(gameFont, nodeTexts[curTextIndx].innerData);
+		headerText = new TextSprite(gameFont, "");
 		headerText.setXY(10, 10);
 		headerText.setWrapWidth(500);
 		headerEntity.addChild(new Entity().add(headerText));
@@ -95,7 +100,7 @@ class AdventureEngine extends Component
 		adventureEntity.addChild(headerEntity);
 		
 		nextTextEntity = new Entity();
-		var nextTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
+		nextTextBG = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
 		nextTextEntity.add(nextTextBG);
 		
 		var nextTextButton: TextSprite = new TextSprite(gameFontItalic, "Next");
@@ -108,14 +113,10 @@ class AdventureEngine extends Component
 		nextTextButton.y._ = nextTextBG.height._ / 2 - (nextTextButton.getNaturalHeight() / 2);
 		nextTextEntity.addChild(new Entity().add(nextTextButton));
 		
-		nextTextBG.pointerUp.connect(function(event: PointerEvent) {
-			NextText();
-		});
-		
 		textOptionsEntity.addChild(nextTextEntity);
 		
 		backTextEntity = new Entity();
-		var backTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
+		backTextBG = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
 		backTextEntity.add(backTextBG);
 		
 		var backTextButton: TextSprite = new TextSprite(gameFontItalic, "Back");
@@ -127,10 +128,6 @@ class AdventureEngine extends Component
 		backTextButton.x._ = backTextBG.width._ / 2 - (backTextButton.getNaturalWidth() / 2);
 		backTextButton.y._ = backTextBG.height._ / 2 - (backTextButton.getNaturalHeight() / 2);
 		backTextEntity.addChild(new Entity().add(backTextButton));
-		
-		backTextBG.pointerUp.connect(function(event: PointerEvent) {
-			BackText();
-		});
 		
 		textOptionsEntity.addChild(backTextEntity);
 		
@@ -151,105 +148,130 @@ class AdventureEngine extends Component
 		goToMenuText.y._ = goToMenuBG.height._ / 2 - (goToMenuText.getNaturalHeight() / 2);
 		goToMenuEntity.addChild(new Entity().add(goToMenuText));
 		
-		CleanStage();
-	}
-	
-	public function OnRestart(func: Dynamic): Void {
-		onRestartFunc = func;
-	}
-	
-	public function Reset(): Void {
-		mainNode = xmlFast;
-		curNode = Utils.GetNodeFrom(mainNode, "start");
-		SetupStage();
-		CleanStage();
-		adventureEntity.removeChild(goToMenuEntity);
 		
-		goToMenuBG.pointerUp.connect(function(event: PointerEvent) {			
-			if(onRestartFunc != null) {
-				onRestartFunc();
-			}
-		}).once();
+		SetupStage();
+		
+		headerBG.pointerUp.connect(function(event: PointerEvent) {
+			
+		});
+
+		nextTextBG.pointerUp.connect(function(event: PointerEvent) {
+			ShowNextText();
+		});
+		
+		backTextBG.pointerUp.connect(function(event: PointerEvent) {
+			ShowBackText();
+		});
+		
+		goToMenuBG.pointerUp.connect(function(event: PointerEvent) {
+			Utils.ConsoleLog("Go Back to Menu!");
+		});
 	}
 	
 	public function SetupStage(): Void {
 		nodeTexts = [];
 		nodeChoices = [];
 		
-		for (t in curNode.nodes.text) {
-			nodeTexts.push(t);
+		for (text in curNode.nodes.text) {
+			//Utils.ConsoleLog(text.innerData);
+			nodeTexts.push(text);
 		}
 		
-		for (c in curNode.nodes.choices) {
-			nodeChoices.push(c);
+		for (choices in curNode.nodes.choices) {
+			nodeChoices.push(choices);
 		}
 		
-		UpdateChoices();
-	}
-	
-	public function CleanStage(): Void {
 		curTextIndx = 0;
 		SetHeaderTextDirty();
+		ShowTextOptionsEntity();
+		UpdateTextOptionsEntity();
+		UpdateChoices();
+		HideChoices();
+		HideGoToMenu();
+	}
+	
+	public function ShowNextText(): Void {
+		curTextIndx++;
+		curTextIndx = FMath.clamp(curTextIndx, 0, nodeTexts.length - 1);
+		//Utils.ConsoleLog(curTextIndx + "");
 		
-		adventureEntity.removeChild(choicesEntity);
+		// Show choices on last node if available
+		if (curTextIndx == nodeTexts.length - 1) {
+			ShowChoices();
+			
+			if (nodeChoices.length == 1 && nodeChoices[0].att.name == "end") {
+				Utils.ConsoleLog("Game End!");
+				HideChoices();
+				ShowGoToMenu();
+				HideTextOptionsEntity();
+			}
+			
+		}
+		
+		UpdateTextOptionsEntity();
+		SetHeaderTextDirty();
+	}
+	
+	public function ShowBackText(): Void {
+		curTextIndx--;
+		curTextIndx = FMath.clamp(curTextIndx, 0, nodeTexts.length - 1);
+		Utils.ConsoleLog(curTextIndx + "");
+		
+		if (curTextIndx != nodeTexts.length - 1) {
+			HideChoices();
+			HideGoToMenu();
+		}
+		
+		UpdateTextOptionsEntity();
+		SetHeaderTextDirty();
+	}
+	
+	public function HideNextButton(): Void {
+		textOptionsEntity.removeChild(nextTextEntity);
+		textOptionsEntity.addChild(backTextEntity);
+	}
+	
+	public function HideBackButton(): Void {
 		textOptionsEntity.removeChild(backTextEntity);
 		textOptionsEntity.addChild(nextTextEntity);
 	}
 	
-	public function BackText(): Void {
-		curTextIndx--;
-		curTextIndx = FMath.clamp(curTextIndx, 0, nodeTexts.length - 1);
-		
-		if (curTextIndx == 0) {
-			textOptionsEntity.removeChild(backTextEntity);
-		}
-		
+	public function HideTextOptionsEntity(): Void {
+		adventureEntity.removeChild(textOptionsEntity);
+	}
+	
+	public function ShowTextOptionsEntity(): Void {
 		textOptionsEntity.addChild(nextTextEntity);
-		
-		// Always remove choices buttons when going back
-		adventureEntity.removeChild(choicesEntity);
-		
-		// Always remove go to menu button when going back
-		adventureEntity.removeChild(goToMenuEntity);
-		
-		SetHeaderTextDirty();
-	}
-	
-	public function NextText(): Void {
-		curTextIndx++;
-		curTextIndx = FMath.clamp(curTextIndx, 0, nodeTexts.length - 1);
-		
-		if (curTextIndx == nodeTexts.length -1 ) {
-			ShowChoices();
-			textOptionsEntity.removeChild(nextTextEntity);
-			
-			if (nodeChoices.length == 1 && nodeChoices[0].att.name == "end") {
-				Utils.ConsoleLog("END!");
-				adventureEntity.removeChild(textOptionsEntity);
-				adventureEntity.removeChild(choicesEntity);
-				adventureEntity.addChild(goToMenuEntity);
-			}
-		}
-		
 		textOptionsEntity.addChild(backTextEntity);
-		
-		SetHeaderTextDirty();
+		adventureEntity.addChild(textOptionsEntity);
 	}
 	
-	public function SetHeaderTextDirty(): Void {
-		if (headerText == null) {
-			return;
-		}
-		
-		headerText.text = nodeTexts[curTextIndx].innerData;
+	public function HideGoToMenu(): Void {
+		adventureEntity.removeChild(goToMenuEntity);
 	}
 	
-	public function ShowChoices(): Void {		
-		adventureEntity.addChild(choicesEntity);
+	public function ShowGoToMenu(): Void {
+		adventureEntity.addChild(goToMenuEntity);
 	}
 	
 	public function HideChoices(): Void {
 		adventureEntity.removeChild(choicesEntity);
+	}
+	
+	public function ShowChoices(): Void {
+		adventureEntity.addChild(choicesEntity);
+	}
+	
+	public function UpdateTextOptionsEntity(): Void {
+		if (curTextIndx == 0) {
+			HideBackButton();
+		}
+		else if (curTextIndx == nodeTexts.length - 1) {
+			HideNextButton();
+		}
+		else {
+			ShowTextOptionsEntity();
+		}
 	}
 	
 	public function UpdateChoices(): Void {
@@ -276,12 +298,24 @@ class AdventureEngine extends Component
 				//Utils.ConsoleLog(choices.name + " " + choices.att.name + " " + choices.innerData);
 				curNode = Utils.GetNodeFrom(mainNode, choices.att.name);
 				SetupStage();
-				CleanStage();
 				mainNode = curNode;
 			}).once();
 			
 			choicesEntity.addChild(buttonEntity);
 			choiceIndx++;
 		}
+	}
+	
+	public function ResetStage(): Void {
+		mainNode = xmlFast;
+		curNode = Utils.GetNodeFrom(mainNode, "start");
+	}
+	
+	public function SetHeaderTextDirty(): Void {
+		if (headerText == null) {
+			return;
+		}
+		
+		headerText.text = nodeTexts[curTextIndx].innerData;
 	}
 }
