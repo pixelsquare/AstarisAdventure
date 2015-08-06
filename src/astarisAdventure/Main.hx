@@ -1,4 +1,4 @@
-package atarisAdventure;
+package astarisAdventure;
 
 import flambe.asset.File;
 import flambe.display.Font;
@@ -13,13 +13,17 @@ import flambe.display.ImageSprite;
 import flambe.util.SignalConnection;
 import haxe.xml.Fast;
 
-import atarisAdventure.utils.AssetName;
-import atarisAdventure.pxlSq.Utils;
+import astarisAdventure.utils.AssetName;
+import astarisAdventure.pxlSq.Utils;
 
 class Main
 {
 	private static var assetPack: AssetPack;
 	private static var titleFont: Font;
+	private static var bettyFont_20: Font;
+	private static var bettyFont_32: Font;
+	private static var garamondFont: Font;
+	private static var garamondItalicFont: Font;
 		
 	private static var titleScreenEntity: Entity;
 	private static var mainGameScreenEntity: Entity;
@@ -59,7 +63,11 @@ class Main
         //System.root.addChild(new Entity().add(plane));
 		
 		assetPack = pack;
-		titleFont = new Font(assetPack, AssetName.FONT_BEBASNEUE);
+		titleFont = new Font(assetPack, AssetName.FONT_HAZEL_GRACE_80);
+		bettyFont_20 = new Font(assetPack, AssetName.FONT_BETTY_20);
+		bettyFont_32 = new Font(assetPack, AssetName.FONT_BETTY_32);
+		garamondFont = new Font(assetPack, AssetName.FONT_APPLE_GARAMOND_32 );
+		garamondItalicFont = new Font(assetPack, AssetName.FONT_APPLE_GARMOND_ITALIC_32 );
 		
 		createTitleScreen();
 		createMainGameScreen();
@@ -76,17 +84,25 @@ class Main
 		titleBG.y._ = System.stage.height / 2 - (titleBG.height._ / 2);
 		titleEntity.add(titleBG);
 		
-		var atarisText: TextSprite = new TextSprite(titleFont, "Ataris");
-		atarisText.centerAnchor();
-		atarisText.x._ = System.stage.width / 2;
-		atarisText.y._ = titleBG.height._ / 2 - (atarisText.getNaturalHeight() / 2);
-		titleEntity.addChild(new Entity().add(atarisText));		
+		var astarisText: TextSprite = new TextSprite(titleFont, "Astaris");
+		astarisText.centerAnchor();
+		astarisText.x._ = System.stage.width / 2 - (astarisText.getNaturalWidth() * 0.25);
+		astarisText.y._ = titleBG.height._ / 2;
+		astarisText.setLetterSpacing(15);
+		//atarisText.y._ = titleBG.height._ / 2 + (atarisText.getNaturalHeight() / 2);
+		titleEntity.addChild(new Entity().add(astarisText));		
 		
-		var adventureText: TextSprite = new TextSprite(titleFont, "Adventure");
+		var adventureText: TextSprite = new TextSprite(bettyFont_20, "Choose your own Adventure");
 		adventureText.centerAnchor();
 		adventureText.x._ = System.stage.width / 2;
-		adventureText.y._ = titleBG.height._ / 2 + (adventureText.getNaturalHeight() / 2);
+		adventureText.y._ = titleBG.height._ * 0.8;
 		titleEntity.addChild(new Entity().add(adventureText));
+		
+		var clickAnywhereText: TextSprite = new TextSprite(bettyFont_32, "Click anywhere to Start!");
+		clickAnywhereText.centerAnchor();
+		clickAnywhereText.x._ = System.stage.width / 2;
+		clickAnywhereText.y._ = System.stage.height * 0.7;
+		titleScreenEntity.addChild(new Entity().add(clickAnywhereText));
 		
 		titleScreenEntity.addChild(titleEntity);
 	}
@@ -95,7 +111,7 @@ class Main
 		mainGameScreenEntity = new Entity();
 		
 		adventureEngine = new AdventureEngine();
-		adventureEngine.Init(titleFont, assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE));
+		adventureEngine.Init(garamondFont, garamondItalicFont, assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE));
 		adventureEngine.OnRestart(function() { 
 			showTitleScreen();
 		});

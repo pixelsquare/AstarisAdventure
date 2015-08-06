@@ -1,5 +1,5 @@
 # Basic information about the game.
-name: Ataris Adventure
+name: Astaris Adventure
 description: Create-your-own-adventure game.
 
 # Information about the game developer.
@@ -14,7 +14,7 @@ id: com.yourdomain.yourgame
 version: 1.0.0
 
 # The main class name.
-main: atarisAdventure.Main
+main: astarisAdventure.Main
 
 # The platform to use when invoking `run` or `build` with no arguments.
 default_platform: flash

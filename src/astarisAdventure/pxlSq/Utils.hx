@@ -1,4 +1,4 @@
-package atarisAdventure.pxlSq;
+package astarisAdventure.pxlSq;
 import haxe.xml.Fast;
 
 #if flash

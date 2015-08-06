@@ -1,4 +1,4 @@
-package atarisAdventure;
+package astarisAdventure;
 
 import flambe.input.PointerEvent;
 import flambe.script.Repeat;
@@ -21,7 +21,7 @@ import flambe.script.MoveBy;
 import flambe.script.MoveTo;
 import flambe.script.Delay;
 
-import atarisAdventure.pxlSq.Utils;
+import astarisAdventure.pxlSq.Utils;
 
 /**
  * ...
@@ -45,6 +45,7 @@ class AdventureEngine extends Component
 	private var goToMenuBG: FillSprite;
 	
 	private var gameFont: Font;
+	private var gameFontItalic: Font;
 	
 	private var mainNode: Fast;
 	private var curNode: Fast;
@@ -69,8 +70,10 @@ class AdventureEngine extends Component
 		owner.addChild(adventureEntity);
 	}
 	
-	public function Init(font: Font, file: File): Void {
+	public function Init(font: Font, fontItalic: Font, file: File): Void {
 		gameFont = font;
+		gameFontItalic = fontItalic;
+		
 		xmlData = Xml.parse(file.toString());
 		xmlFast = new Fast(xmlData.firstElement());
 		
@@ -95,9 +98,9 @@ class AdventureEngine extends Component
 		var nextTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
 		nextTextEntity.add(nextTextBG);
 		
-		var nextTextButton: TextSprite = new TextSprite(gameFont, "Next");
-		nextTextBG.width._ = nextTextButton.getNaturalWidth() + 10;
-		nextTextBG.height._ = nextTextButton.getNaturalHeight() + 10;
+		var nextTextButton: TextSprite = new TextSprite(gameFontItalic, "Next");
+		nextTextBG.width._ = nextTextButton.getNaturalWidth() + 15;
+		nextTextBG.height._ = nextTextButton.getNaturalHeight() + 5;
 		nextTextBG.x._ = System.stage.width * 0.9 - (nextTextBG.width._ / 2);
 		nextTextBG.y._ = System.stage.height * 0.85 - (nextTextBG.height._ / 2);
 		
@@ -115,9 +118,9 @@ class AdventureEngine extends Component
 		var backTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
 		backTextEntity.add(backTextBG);
 		
-		var backTextButton: TextSprite = new TextSprite(gameFont, "Back");
-		backTextBG.width._ = backTextButton.getNaturalWidth() + 10;
-		backTextBG.height._ = backTextButton.getNaturalHeight() + 10;
+		var backTextButton: TextSprite = new TextSprite(gameFontItalic, "Back");
+		backTextBG.width._ = backTextButton.getNaturalWidth() + 15;
+		backTextBG.height._ = backTextButton.getNaturalHeight() + 5;
 		backTextBG.x._ = System.stage.width * 0.1 - (backTextBG.width._ / 2);
 		backTextBG.y._ = System.stage.height * 0.85 - (backTextBG.height._ / 2);
 		
@@ -138,11 +141,11 @@ class AdventureEngine extends Component
 
 		goToMenuEntity.add(goToMenuBG);
 		
-		var goToMenuText: TextSprite = new TextSprite(gameFont, "Go To Menu");
-		goToMenuBG.width._ = goToMenuText.getNaturalWidth() + 20;
-		goToMenuBG.height._ = goToMenuText.getNaturalHeight() + 20;
+		var goToMenuText: TextSprite = new TextSprite(gameFontItalic, "Go To Menu");
+		goToMenuBG.width._ = goToMenuText.getNaturalWidth() + 15;
+		goToMenuBG.height._ = goToMenuText.getNaturalHeight() + 15;
 		goToMenuBG.x._ = System.stage.width / 2 - (goToMenuBG.width._ / 2);
-		goToMenuBG.y._ = System.stage.height * 0.8 - (goToMenuBG.height._ / 2);
+		goToMenuBG.y._ = System.stage.height * 0.7 - (goToMenuBG.height._ / 2);
 		
 		goToMenuText.x._ = goToMenuBG.width._ / 2 - (goToMenuText.getNaturalWidth() / 2);
 		goToMenuText.y._ = goToMenuBG.height._ / 2 - (goToMenuText.getNaturalHeight() / 2);
@@ -222,6 +225,7 @@ class AdventureEngine extends Component
 			
 			if (nodeChoices.length == 1 && nodeChoices[0].att.name == "end") {
 				Utils.ConsoleLog("END!");
+				adventureEntity.removeChild(textOptionsEntity);
 				adventureEntity.removeChild(choicesEntity);
 				adventureEntity.addChild(goToMenuEntity);
 			}
@@ -259,8 +263,8 @@ class AdventureEngine extends Component
 			buttonEntity.add(buttonBG);
 			
 			var buttonText: TextSprite = new TextSprite(gameFont, choices.innerData);
-			buttonBG.width._ = buttonText.getNaturalWidth() + 20;
-			buttonBG.height._ = buttonText.getNaturalHeight() + 10;
+			buttonBG.width._ = buttonText.getNaturalWidth() + 15;
+			buttonBG.height._ = buttonText.getNaturalHeight() + 5;
 			buttonBG.x._ = System.stage.width / 2 - (buttonBG.width._ / 2);
 			buttonBG.y._ = System.stage.height * 0.6 - (buttonBG.height._ / 2) + (choiceIndx * 50);
 			
