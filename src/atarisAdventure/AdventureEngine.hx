@@ -36,16 +36,23 @@ class AdventureEngine extends Component
 	private var nextTextEntity: Entity;
 	private var backTextEntity: Entity;
 	
+	private var goToMenuEntity: Entity;
+	
 	private var xmlData: Xml;
 	private var xmlFast: Fast;
 	
 	private var headerText: TextSprite;
+	private var goToMenuBG: FillSprite;
 	
 	private var gameFont: Font;
 	
 	private var mainNode: Fast;
+	private var curNode: Fast;
+	
 	private var nodeTexts = [];
 	private var nodeChoices = [];
+	
+	private var onRestartFunc: Dynamic;
 	
 	private var curTextIndx: Int;
 	
@@ -67,18 +74,9 @@ class AdventureEngine extends Component
 		xmlData = Xml.parse(file.toString());
 		xmlFast = new Fast(xmlData.firstElement());
 		
-		mainNode = GetNode("start");
-		SetupNode();
-		
-		//var node1: Fast = GetNode("node1");
-		//for (n in node1.nodes.node) {
-			//Utils.ConsoleLog(n.att.name);
-		//}
-		//
-		//var node1_1: Fast = GetNode("node1_1");
-		//for (n in node1_1.nodes.node) {
-			//Utils.ConsoleLog(n.att.name);
-		//}
+		mainNode = xmlFast;
+		curNode = Utils.GetNodeFrom(mainNode, "start");
+		SetupStage();
 		
 		var headerEntity: Entity = new Entity();
 		var headerBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.8, 200);
@@ -95,16 +93,19 @@ class AdventureEngine extends Component
 		
 		nextTextEntity = new Entity();
 		var nextTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
-		nextTextBG.x._ = System.stage.width * 0.9 - (nextTextBG.width._ / 2);
-		nextTextBG.y._ = System.stage.height * 0.8 - (nextTextBG.height._ / 2);
 		nextTextEntity.add(nextTextBG);
 		
 		var nextTextButton: TextSprite = new TextSprite(gameFont, "Next");
+		nextTextBG.width._ = nextTextButton.getNaturalWidth() + 10;
+		nextTextBG.height._ = nextTextButton.getNaturalHeight() + 10;
+		nextTextBG.x._ = System.stage.width * 0.9 - (nextTextBG.width._ / 2);
+		nextTextBG.y._ = System.stage.height * 0.85 - (nextTextBG.height._ / 2);
+		
 		nextTextButton.x._ = nextTextBG.width._ / 2 - (nextTextButton.getNaturalWidth() / 2);
 		nextTextButton.y._ = nextTextBG.height._ / 2 - (nextTextButton.getNaturalHeight() / 2);
 		nextTextEntity.addChild(new Entity().add(nextTextButton));
 		
-		nextTextBG.pointerDown.connect(function(event: PointerEvent) {
+		nextTextBG.pointerUp.connect(function(event: PointerEvent) {
 			NextText();
 		});
 		
@@ -112,34 +113,71 @@ class AdventureEngine extends Component
 		
 		backTextEntity = new Entity();
 		var backTextBG: FillSprite = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
-		backTextBG.x._ = System.stage.width * 0.1 - (backTextBG.width._ / 2);
-		backTextBG.y._ = System.stage.height * 0.8 - (backTextBG.height._ / 2);
 		backTextEntity.add(backTextBG);
 		
 		var backTextButton: TextSprite = new TextSprite(gameFont, "Back");
+		backTextBG.width._ = backTextButton.getNaturalWidth() + 10;
+		backTextBG.height._ = backTextButton.getNaturalHeight() + 10;
+		backTextBG.x._ = System.stage.width * 0.1 - (backTextBG.width._ / 2);
+		backTextBG.y._ = System.stage.height * 0.85 - (backTextBG.height._ / 2);
+		
 		backTextButton.x._ = backTextBG.width._ / 2 - (backTextButton.getNaturalWidth() / 2);
 		backTextButton.y._ = backTextBG.height._ / 2 - (backTextButton.getNaturalHeight() / 2);
 		backTextEntity.addChild(new Entity().add(backTextButton));
 		
-		backTextBG.pointerDown.connect(function(event: PointerEvent) {
+		backTextBG.pointerUp.connect(function(event: PointerEvent) {
 			BackText();
 		});
 		
 		textOptionsEntity.addChild(backTextEntity);
 		
 		adventureEntity.addChild(textOptionsEntity);
+		
+		goToMenuEntity = new Entity();
+		goToMenuBG = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
+
+		goToMenuEntity.add(goToMenuBG);
+		
+		var goToMenuText: TextSprite = new TextSprite(gameFont, "Go To Menu");
+		goToMenuBG.width._ = goToMenuText.getNaturalWidth() + 20;
+		goToMenuBG.height._ = goToMenuText.getNaturalHeight() + 20;
+		goToMenuBG.x._ = System.stage.width / 2 - (goToMenuBG.width._ / 2);
+		goToMenuBG.y._ = System.stage.height * 0.8 - (goToMenuBG.height._ / 2);
+		
+		goToMenuText.x._ = goToMenuBG.width._ / 2 - (goToMenuText.getNaturalWidth() / 2);
+		goToMenuText.y._ = goToMenuBG.height._ / 2 - (goToMenuText.getNaturalHeight() / 2);
+		goToMenuEntity.addChild(new Entity().add(goToMenuText));
+		
+		CleanStage();
 	}
 	
-	public function SetupNode(): Void {
+	public function OnRestart(func: Dynamic): Void {
+		onRestartFunc = func;
+	}
+	
+	public function Reset(): Void {
+		mainNode = xmlFast;
+		curNode = Utils.GetNodeFrom(mainNode, "start");
+		SetupStage();
+		CleanStage();
+		adventureEntity.removeChild(goToMenuEntity);
+		
+		goToMenuBG.pointerUp.connect(function(event: PointerEvent) {			
+			if(onRestartFunc != null) {
+				onRestartFunc();
+			}
+		}).once();
+	}
+	
+	public function SetupStage(): Void {
 		nodeTexts = [];
 		nodeChoices = [];
-		//Utils.ConsoleLog(nodeChoices.length + "");
 		
-		for (t in mainNode.nodes.text) {
+		for (t in curNode.nodes.text) {
 			nodeTexts.push(t);
 		}
 		
-		for (c in mainNode.nodes.choices) {
+		for (c in curNode.nodes.choices) {
 			nodeChoices.push(c);
 		}
 		
@@ -168,6 +206,9 @@ class AdventureEngine extends Component
 		// Always remove choices buttons when going back
 		adventureEntity.removeChild(choicesEntity);
 		
+		// Always remove go to menu button when going back
+		adventureEntity.removeChild(goToMenuEntity);
+		
 		SetHeaderTextDirty();
 	}
 	
@@ -178,6 +219,12 @@ class AdventureEngine extends Component
 		if (curTextIndx == nodeTexts.length -1 ) {
 			ShowChoices();
 			textOptionsEntity.removeChild(nextTextEntity);
+			
+			if (nodeChoices.length == 1 && nodeChoices[0].att.name == "end") {
+				Utils.ConsoleLog("END!");
+				adventureEntity.removeChild(choicesEntity);
+				adventureEntity.addChild(goToMenuEntity);
+			}
 		}
 		
 		textOptionsEntity.addChild(backTextEntity);
@@ -193,32 +240,12 @@ class AdventureEngine extends Component
 		headerText.text = nodeTexts[curTextIndx].innerData;
 	}
 	
-	public function ShowChoices(): Void {
+	public function ShowChoices(): Void {		
 		adventureEntity.addChild(choicesEntity);
 	}
 	
 	public function HideChoices(): Void {
 		adventureEntity.removeChild(choicesEntity);
-	}
-	
-	public function GetNode(name: String): Fast {
-		for (n in xmlFast.nodes.node) {
-			if (n.att.name == name) {
-				return n;
-			}
-		}
-		
-		return null;
-	}
-	
-	public function GetNodeFrom(xmlNode: Fast, name: String): Fast {
-		for (n in xmlNode.nodes.node) {
-			if (n.att.name == name) {
-				return n;
-			}
-		}
-		
-		return null;
 	}
 	
 	public function UpdateChoices(): Void {
@@ -241,12 +268,13 @@ class AdventureEngine extends Component
 			buttonText.y._ = buttonBG.height._ / 2 - (buttonText.getNaturalHeight() / 2);
 			buttonEntity.addChild(new Entity().add(buttonText));
 			
-			buttonBG.pointerDown.connect(function(event: PointerEvent) {
-				Utils.ConsoleLog(choices.name + " " + choices.att.name + " " + choices.innerData);
-				mainNode = GetNodeFrom(mainNode, choices.att.name);
-				SetupNode();
+			buttonBG.pointerUp.connect(function(event: PointerEvent) {
+				//Utils.ConsoleLog(choices.name + " " + choices.att.name + " " + choices.innerData);
+				curNode = Utils.GetNodeFrom(mainNode, choices.att.name);
+				SetupStage();
 				CleanStage();
-			});
+				mainNode = curNode;
+			}).once();
 			
 			choicesEntity.addChild(buttonEntity);
 			choiceIndx++;

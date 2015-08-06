@@ -1,4 +1,5 @@
 package atarisAdventure.pxlSq;
+import haxe.xml.Fast;
 
 #if flash
 import flash.external.ExternalInterface;
@@ -16,5 +17,15 @@ class Utils
 		#if flash
 		ExternalInterface.call("console.log", str);
 		#end
+	}
+	
+	public static function GetNodeFrom(xmlNode: Fast, nodeName: String): Fast {
+		for (n in xmlNode.nodes.node) {
+			if (n.has.name && n.att.name == nodeName) {
+				return n;
+			}
+		}
+		
+		return null;
 	}
 }

@@ -28,6 +28,7 @@
 			<text>Only to realize that the color of the supposed water was different. I drank something that's not water.</text>
 			<text>But, it was too late. The surroundings around me grew dim as I felt my heart coming slowly to a stop.</text>
 			<text>Sigh, I guess I'll never found out who I am. I'm so lame.</text>
+			<choices name="end">end</choices>
 		</node>
 		
 		<node name="node1_2">
@@ -36,6 +37,7 @@
 			<text>Minutes turned to hours as I kept on the look out for other things, remaining on the same spot. And in a little while, dizziness caught up to me due to dehydration.</text>
 			<text>Falling into a slump on the sandy ground, I passed out.</text>
 			<text>Really, no one stays in one spot under this heat. I should've died with a little more effort of moving around the place.</text>
+			<choices name="end">end</choices>
 		</node>
 	</node>
 	
@@ -69,6 +71,7 @@
 				<text>Minutes turned to hours as I kept on the look out for other things, remaining on the same spot. And in a little while, dizziness caught to me due to dehydration.</text>
 				<text>Falling into a slump on the sandy ground, I passed out.</text>
 				<text>Really, no one stays in one spot under this heat. I should've died with a little more effort of moving around the place.</text>
+				<choices name="end">end</choices>
 			</node>
 			
 			<node name="node2_1_2">
@@ -94,6 +97,7 @@
 				<text>Talking to the leader of the caravan, I applied for the position. He had a look of doubt but, when I demonstrated my strength. It was enough for him.</text>
 				<text>In the end, I journeyed with the caravan as I enjoyed my job. They became family.</text>
 				<text>Long forgotten is my quest for my identity and Astaris.</text>
+				<choices name="end">end</choices>
 			</node>
 		</node>
 		
@@ -113,6 +117,7 @@
 			<text>Great. I was captured by a slave trader.</text>
 			<text>And with that, the start of the tales of my life as a slave, where I had died the year after I was turned into a slave, began.</text>
 			<text>Talk about bad decisions.</text>
+			<choices name="end">end</choices>
 		</node>
 	</node>
 	
@@ -167,6 +172,7 @@
 			<text>"I am... Prince Ehki."</text>
 			<text>I closed my eyes and slowly opened them as the brooch glowed with my memories slowly returning.</text>
 			<text>"I'm home."</text>
+			<choices name="end">end</choices>
 		</node>
 		
 		<node name="node3_2">
@@ -176,7 +182,7 @@
 			<text>I did my job properly. And in the end, I stayed with the caravan. I greatly enjoyed the caravan too much that they became my family.</text>
 			<text>My priorities also got twisted along the way as well and I had forgotten about my original quest.</text>
 			<text>Past is past...right?</text>
-			
+			<choices name="end">end</choices>
 		</node>
 		
 		<node name="node3_3">
@@ -194,6 +200,7 @@
 			<text>The leader didn't get what she said as she disappeared back inside the wagon.</text>
 			<text>"Ugh, she got the prediction wrong. That's a first."</text>
 			<text>With that, the caravan never reached that nearest town.</text>
+			<choices name="end">end</choices>
 		</node>
 	</node>
 	

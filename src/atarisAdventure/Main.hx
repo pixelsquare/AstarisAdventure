@@ -64,8 +64,8 @@ class Main
 		createTitleScreen();
 		createMainGameScreen();
 		
-		//showTitleScreen();
-		showMainGameScreen();
+		showTitleScreen();
+		//showMainGameScreen();
     }
 	
 	private static function createTitleScreen() {
@@ -96,6 +96,10 @@ class Main
 		
 		adventureEngine = new AdventureEngine();
 		adventureEngine.Init(titleFont, assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE));
+		adventureEngine.OnRestart(function() { 
+			showTitleScreen();
+		});
+		
 		mainGameScreenEntity.add(adventureEngine);
 		
 		//var headerEntity: Entity = new Entity();
@@ -114,17 +118,20 @@ class Main
 		//mainGameScreenEntity.addChild(headerEntity);
 	}
 	
-	private static function showTitleScreen() {		
-		titleScreenSignalConnection = System.pointer.down.connect(
-			function(event: PointerEvent) {
-				showMainGameScreen();
-			}
-		);
-		
+	private static function showTitleScreen() {			
+		System.root.removeChild(mainGameScreenEntity);
 		System.root.addChild(titleScreenEntity);
+		
+		titleScreenSignalConnection = System.pointer.down.connect(
+		function(event: PointerEvent) {
+			System.root.removeChild(titleScreenEntity);
+			System.root.addChild(mainGameScreenEntity);
+			
+			adventureEngine.Reset();
+		}).once();
 	}
 	
-	private static function showMainGameScreen() {
+	//private static function showMainGameScreen() {
 		//var script: Script = new Script();
 		//script.run(new Sequence([
 				//new AnimateTo(headerBG.alpha, 1, 1),
@@ -135,7 +142,7 @@ class Main
 		//mainGameScreenEntity.add(script);
 		//mainGameScreenEntity.addChild(new Entity().add(script));
 		
-		System.root.removeChild(titleScreenEntity);
-		System.root.addChild(mainGameScreenEntity);
-	}
+		//System.root.removeChild(titleScreenEntity);
+		//System.root.addChild(mainGameScreenEntity);
+	//}
 }
