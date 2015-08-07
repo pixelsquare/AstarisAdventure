@@ -10,7 +10,6 @@ import flambe.Entity;
 import flambe.input.PointerEvent;
 import flambe.System;
 import flambe.util.SignalConnection;
-import flash.utils.Function;
 
 
 class Main
@@ -77,7 +76,6 @@ class Main
 		astarisText.x._ = System.stage.width / 2 - (astarisText.getNaturalWidth() * 0.25);
 		astarisText.y._ = titleBG.height._ / 2;
 		astarisText.setLetterSpacing(15);
-		//atarisText.y._ = titleBG.height._ / 2 + (atarisText.getNaturalHeight() / 2);
 		titleEntity.addChild(new Entity().add(astarisText));		
 		
 		var adventureText: TextSprite = new TextSprite(new Font(assetPack, AssetName.FONT_BETTY_20), "Choose your own Adventure");
@@ -113,7 +111,8 @@ class Main
 		adventureEngine = new AdventureEngine();
 		adventureEngine.Init(
 			new Font(assetPack, AssetName.FONT_APPLE_GARAMOND_32), 
-			new Font(assetPack, AssetName.FONT_APPLE_GARMOND_ITALIC_32), 
+			new Font(assetPack, AssetName.FONT_APPLE_GARMOND_ITALIC_32),
+			new Font(assetPack, AssetName.FONT_ARIAL_NARROW_20),
 			assetPack.getFile(AssetName.XML_ATARIS_ADVENTURE)
 		);
 		
@@ -131,7 +130,6 @@ class Main
 		titleScreenSignalConnection = System.pointer.down.connect(
 		function(event: PointerEvent) {
 			showMainGameScreen();
-			//adventureEngine.Reset();
 		}).once();
 	}
 	

@@ -33,7 +33,9 @@ class AdventureEngine extends Component
 	private var adventureEntity: Entity;
 	private var textOptionsEntity: Entity;
 	private var choicesEntity: Entity;
-	private var xmlInfoEntity: Entity;
+	
+	private var xmlHeaderInfoEntity: Entity;
+	private var xmlButtonInfoEntity: Entity;
 	
 	private var nextTextEntity: Entity;
 	private var backTextEntity: Entity;
@@ -47,18 +49,19 @@ class AdventureEngine extends Component
 	private var xmlFast: Fast;
 	
 	private var headerText: TextSprite;
+	private var headerNameText: TextSprite;
+	
 	public var goToMenuBG(default, null): FillSprite;
 	
 	private var gameFont: Font;
 	private var gameFontItalic: Font;
+	private var gameFont_20: Font;
 	
 	private var mainNode: Fast;
 	private var curNode: Fast;
 	
 	private var nodeTexts = [];
 	private var nodeChoices = [];
-	
-	//private var onRestartFunc: Dynamic;
 	
 	private var curTextIndx: Int;
 	
@@ -67,7 +70,8 @@ class AdventureEngine extends Component
 		adventureEntity = new Entity();
 		textOptionsEntity = new Entity();
 		choicesEntity = new Entity();
-		xmlInfoEntity = new Entity();
+		xmlHeaderInfoEntity = new Entity();
+		xmlButtonInfoEntity = new Entity();
 	}
 	
 	override public function onAdded() 
@@ -76,9 +80,10 @@ class AdventureEngine extends Component
 		owner.addChild(adventureEntity);
 	}
 	
-	public function Init(font: Font, fontItalic: Font, file: File): Void {
+	public function Init(font: Font, fontItalic: Font, font_20: Font, file: File): Void {
 		gameFont = font;
 		gameFontItalic = fontItalic;
+		gameFont_20 = font_20;
 		
 		xmlData = Xml.parse(file.toString());
 		xmlFast = new Fast(xmlData.firstElement());
@@ -102,6 +107,24 @@ class AdventureEngine extends Component
 		nextTextEntity = new Entity();
 		nextTextBG = new FillSprite(0xFFFFFF, System.stage.width * 0.1, 50);
 		nextTextEntity.add(nextTextBG);
+		
+		var headerInfoEntity: Entity = new Entity();
+		var headerInfoBG: FillSprite = new FillSprite(0xFFFF00, System.stage.width * 0.8, 20);
+		
+		var infoEntity: Entity = new Entity();
+		var infoBG: FillSprite = new FillSprite(0xFFFF00, System.stage.width * 0.15, 20);
+		infoBG.centerAnchor();
+		infoBG.x._ = headerBG.x._ + (headerBG.getNaturalWidth() / 2);
+		infoBG.y._ = headerBG.y._ + (headerBG.getNaturalHeight());
+		infoEntity.add(infoBG);
+			
+		headerNameText = new TextSprite(gameFont_20, "Node: ");
+		headerNameText.centerAnchor();
+		headerNameText.x._ = infoBG.getNaturalWidth() / 2 - (headerNameText.getNaturalWidth() / 2);
+		headerNameText.y._ += infoBG.getNaturalHeight() / 2;
+		infoEntity.addChild(new Entity().add(headerNameText));
+		
+		xmlHeaderInfoEntity.addChild(infoEntity);
 		
 		var nextTextButton: TextSprite = new TextSprite(gameFontItalic, "Next");
 		nextTextBG.width._ = nextTextButton.getNaturalWidth() + 15;
@@ -152,7 +175,13 @@ class AdventureEngine extends Component
 		SetupStage();
 		
 		headerBG.pointerUp.connect(function(event: PointerEvent) {
-			
+			if (curTextIndx == nodeTexts.length - 1) {
+				ShowXmlInfo();
+			}
+			else {
+				HideXmlInfo();
+				adventureEntity.addChild(xmlHeaderInfoEntity);
+			}
 		});
 
 		nextTextBG.pointerUp.connect(function(event: PointerEvent) {
@@ -173,12 +202,12 @@ class AdventureEngine extends Component
 		nodeChoices = [];
 		
 		for (text in curNode.nodes.text) {
-			//Utils.ConsoleLog(text.innerData);
-			nodeTexts.push(text);
+			nodeTexts.push( { nodeName: text.name, attName: "", value: text.innerData } );
 		}
 		
 		for (choices in curNode.nodes.choices) {
-			nodeChoices.push(choices);
+			nodeChoices.push( { nodeName: choices.name, attName: choices.att.name, value: choices.innerData } );
+
 		}
 		
 		curTextIndx = 0;
@@ -188,6 +217,7 @@ class AdventureEngine extends Component
 		UpdateChoices();
 		HideChoices();
 		HideGoToMenu();
+		HideXmlInfo();
 	}
 	
 	public function ShowNextText(): Void {
@@ -197,9 +227,10 @@ class AdventureEngine extends Component
 		
 		// Show choices on last node if available
 		if (curTextIndx == nodeTexts.length - 1) {
+			HideTextOptionsEntity();
 			ShowChoices();
 			
-			if (nodeChoices.length == 1 && nodeChoices[0].att.name == "end") {
+			if (nodeChoices.length == 1 && nodeChoices[0].attName == "end") {
 				Utils.ConsoleLog("Game End!");
 				HideChoices();
 				ShowGoToMenu();
@@ -210,6 +241,7 @@ class AdventureEngine extends Component
 		
 		UpdateTextOptionsEntity();
 		SetHeaderTextDirty();
+		HideXmlInfo();
 	}
 	
 	public function ShowBackText(): Void {
@@ -224,6 +256,7 @@ class AdventureEngine extends Component
 		
 		UpdateTextOptionsEntity();
 		SetHeaderTextDirty();
+		HideXmlInfo();
 	}
 	
 	public function HideNextButton(): Void {
@@ -262,6 +295,16 @@ class AdventureEngine extends Component
 		adventureEntity.addChild(choicesEntity);
 	}
 	
+	public function ShowXmlInfo(): Void {
+		adventureEntity.addChild(xmlHeaderInfoEntity);
+		adventureEntity.addChild(xmlButtonInfoEntity);
+	}
+	
+	public function HideXmlInfo(): Void {
+		adventureEntity.removeChild(xmlHeaderInfoEntity);
+		adventureEntity.removeChild(xmlButtonInfoEntity);
+	}
+	
 	public function UpdateTextOptionsEntity(): Void {
 		if (curTextIndx == 0) {
 			HideBackButton();
@@ -276,6 +319,7 @@ class AdventureEngine extends Component
 	
 	public function UpdateChoices(): Void {
 		choicesEntity.disposeChildren();
+		xmlButtonInfoEntity.disposeChildren();
 		
 		var choiceIndx: Int = 0;
 		for (choices in nodeChoices) {
@@ -284,11 +328,11 @@ class AdventureEngine extends Component
 
 			buttonEntity.add(buttonBG);
 			
-			var buttonText: TextSprite = new TextSprite(gameFont, choices.innerData);
+			var buttonText: TextSprite = new TextSprite(gameFont, choices.value);
 			buttonBG.width._ = buttonText.getNaturalWidth() + 15;
 			buttonBG.height._ = buttonText.getNaturalHeight() + 5;
 			buttonBG.x._ = System.stage.width / 2 - (buttonBG.width._ / 2);
-			buttonBG.y._ = System.stage.height * 0.6 - (buttonBG.height._ / 2) + (choiceIndx * 50);
+			buttonBG.y._ = System.stage.height * 0.6 - (buttonBG.height._ / 2) + (choiceIndx * 60);
 			
 			buttonText.x._ = buttonBG.width._ / 2 - (buttonText.getNaturalWidth() / 2);
 			buttonText.y._ = buttonBG.height._ / 2 - (buttonText.getNaturalHeight() / 2);
@@ -296,12 +340,36 @@ class AdventureEngine extends Component
 			
 			buttonBG.pointerUp.connect(function(event: PointerEvent) {
 				//Utils.ConsoleLog(choices.name + " " + choices.att.name + " " + choices.innerData);
-				curNode = Utils.GetNodeFrom(mainNode, choices.att.name);
+				curNode = Utils.GetNodeFrom(mainNode, choices.attName);
 				SetupStage();
 				mainNode = curNode;
 			}).once();
 			
 			choicesEntity.addChild(buttonEntity);
+			
+			// Button Information ---
+			
+			var infoEntity: Entity = new Entity();
+			var infoBG: FillSprite = new FillSprite(0xFFFF00, System.stage.width * 0.35, 20);
+			infoBG.centerAnchor();
+			infoBG.x._ = buttonBG.x._ + (buttonBG.getNaturalWidth() / 2);
+			infoBG.y._ = buttonBG.y._ + (buttonBG.getNaturalHeight() * 1.2);
+			infoEntity.add(infoBG);
+			
+			var nodeNameText: TextSprite = new TextSprite(gameFont_20, "Node: " + choices.nodeName);
+			nodeNameText.centerAnchor();
+			nodeNameText.x._ = infoBG.getNaturalWidth() / 2 - (infoBG.getNaturalWidth() * 0.25);
+			nodeNameText.y._ += infoBG.getNaturalHeight() / 2;
+			infoEntity.addChild(new Entity().add(nodeNameText));
+			
+			var nodeAttText: TextSprite = new TextSprite(gameFont_20, "Attribute: " + choices.attName);
+			nodeAttText.centerAnchor();
+			nodeAttText.x._ = infoBG.getNaturalWidth() / 2 + (infoBG.getNaturalWidth() * 0.25);
+			nodeAttText.y._ += infoBG.getNaturalHeight() / 2;
+			infoEntity.addChild(new Entity().add(nodeAttText));
+			
+			xmlButtonInfoEntity.addChild(infoEntity, false);
+			
 			choiceIndx++;
 		}
 	}
@@ -316,6 +384,7 @@ class AdventureEngine extends Component
 			return;
 		}
 		
-		headerText.text = nodeTexts[curTextIndx].innerData;
+		headerText.text = nodeTexts[curTextIndx].value;
+		headerNameText.text = "Node: " + nodeTexts[curTextIndx].nodeName;
 	}
 }
