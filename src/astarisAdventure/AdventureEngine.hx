@@ -99,7 +99,7 @@ class AdventureEngine extends Component
 		
 		headerText = new TextSprite(gameFont, "");
 		headerText.setXY(10, 10);
-		headerText.setWrapWidth(500);
+		headerText.setWrapWidth(headerBG.getNaturalWidth() - 15);
 		headerEntity.addChild(new Entity().add(headerText));
 		
 		adventureEntity.addChild(headerEntity);
