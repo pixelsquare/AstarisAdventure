@@ -192,9 +192,9 @@ class AdventureEngine extends Component
 			ShowBackText();
 		});
 		
-		goToMenuBG.pointerUp.connect(function(event: PointerEvent) {
-			Utils.ConsoleLog("Go Back to Menu!");
-		});
+		//goToMenuBG.pointerUp.connect(function(event: PointerEvent) {
+			//Utils.ConsoleLog("Go Back to Menu!");
+		//});
 	}
 	
 	public function SetupStage(): Void {
@@ -231,7 +231,7 @@ class AdventureEngine extends Component
 			ShowChoices();
 			
 			if (nodeChoices.length == 1 && nodeChoices[0].attName == "end") {
-				Utils.ConsoleLog("Game End!");
+				//Utils.ConsoleLog("Game End!");
 				HideChoices();
 				ShowGoToMenu();
 				HideTextOptionsEntity();
@@ -247,7 +247,7 @@ class AdventureEngine extends Component
 	public function ShowBackText(): Void {
 		curTextIndx--;
 		curTextIndx = FMath.clamp(curTextIndx, 0, nodeTexts.length - 1);
-		Utils.ConsoleLog(curTextIndx + "");
+		//Utils.ConsoleLog(curTextIndx + "");
 		
 		if (curTextIndx != nodeTexts.length - 1) {
 			HideChoices();
@@ -330,7 +330,7 @@ class AdventureEngine extends Component
 			
 			var buttonText: TextSprite = new TextSprite(gameFont, choices.value);
 			buttonBG.width._ = buttonText.getNaturalWidth() + 15;
-			buttonBG.height._ = buttonText.getNaturalHeight() + 5;
+			buttonBG.height._ = buttonText.getNaturalHeight() + 15;
 			buttonBG.x._ = System.stage.width / 2 - (buttonBG.width._ / 2);
 			buttonBG.y._ = System.stage.height * 0.6 - (buttonBG.height._ / 2) + (choiceIndx * 60);
 			
