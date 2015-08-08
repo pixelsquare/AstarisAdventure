@@ -8,7 +8,7 @@ developer:
   url: https://github.com/pixelsquare
 
 # The game's unique identifier.
-id: com.yourdomain.yourgame
+id: com.pixelsquare.astarisadventure
 
 # The game's version string.
 version: 1.0.0
